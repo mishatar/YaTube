@@ -1,84 +1,44 @@
+from django.test import TestCase, Client
 from http import HTTPStatus
-from urllib.parse import urljoin
 
-from django.contrib.auth import get_user_model
-from django.test import Client, TestCase
-from django.urls import reverse
-from posts.models import Group, Post
-
-User = get_user_model()
+from ..models import Group, Post, User
 
 
 class TaskURLTests(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        cls.user = User.objects.create(username='TestUser')
         cls.post = Post.objects.create(
-            author=User.objects.create_user(username='test_name1',
-                                            email='test@mail.ru',
-                                            password='test_pass'),
-            text='Тестовая запись для создания нового поста',)
-
+            author=cls.user,
+            text='Текстовый пост'
+        )
         cls.group = Group.objects.create(
-            title=('Заголовок для тестовой группы'),
-            slug='test_slug'
+            title='Тестовый заголовок',
+            slug='test-slug',
+            description='Тестовое описание'
         )
 
     def setUp(self):
-        # Создаем неавторизованный клиент
-        self.guest_client = Client()
-        # Создаем авторизованый клиент
-        self.user = User.objects.create_user(username='mob2556')
-        self.authorized_client = Client()
-        self.authorized_client.force_login(self.user)
-
-    def test_home_and_group(self):
-        """страницы группы и главная доступны всем"""
-        url_names = (
-            '/',
-            '/group/test_slug/',
-        )
-        for adress in url_names:
-            with self.subTest():
-                response = self.guest_client.get(adress)
-                self.assertEqual(response.status_code, HTTPStatus.OK)
-
-    def test_new_for_authorized(self):
-        """Страница /new доступна авторизованному пользователю."""
-        response = self.authorized_client.get('/new/')
-        self.assertEqual(response.status_code, HTTPStatus.OK)
-
-    def test_private_url(self):
-        """без авторизации приватные URL недоступны"""
-        url_names = (
-            '/new/',
-            '/admin/',
-        )
-        for adress in url_names:
-            with self.subTest():
-                response = self.guest_client.get(adress)
-                self.assertEqual(response.status_code, HTTPStatus.FOUND)
-
-    def test_redirect_anonymous_on_login(self):
-        """Страница /new/ перенаправит анонимного пользователя
-        на страницу логина.
-        """
-        response = self.guest_client.get(reverse('new_post'))
-        url = urljoin(reverse('login'), "?next=/new/")
-        self.assertRedirects(response, url)
+        self.client = Client()
+        self.auth = Client()
+        self.auth.force_login(self.user)
 
     def test_urls_uses_correct_template(self):
         """URL-адрес использует соответствующий шаблон."""
         templates_url_names = {
-            'index.html': '/',
-            'group.html': '/group/test_slug/',
-            'new.html': '/new/',
+            '/': 'posts/index.html',
+            '/group/test-slug/': 'posts/group_list.html',
+            '/profile/TestUser/': 'posts/profile.html',
+            '/posts/1/': 'posts/post_detail.html',
+            '/posts/1/edit/': 'posts/create_post.html',
+            '/create/': 'posts/create_post.html',
         }
-        for template, url in templates_url_names.items():
-            with self.subTest(url=url):
-                response = self.authorized_client.get(url)
+        for address, template in templates_url_names.items():
+            with self.subTest(address=address):
+                response = self.auth.get(address)
                 self.assertTemplateUsed(response, template)
 
     def test_page_404(self):
-        response = self.guest_client.get('/qwerty12345/')
+        response = self.client.get('/qwerty12345/')
         self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
