@@ -1,10 +1,10 @@
 import os
+from django.core.management.utils import get_random_secret_key
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
-SECRET_KEY = 'wbo4((qdym4b5(t^&7x^su55zdga)u1umfexhnh2d(e(-1t(18'
-
+SECRET_KEY = get_random_secret_key
 DEBUG = True
 
 CSRF_FAILURE_VIEW = 'core.views.csrf_failure'

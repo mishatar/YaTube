@@ -11,7 +11,7 @@ FIRST_THIRTY = 30
 
 @cache_page(20, key_prefix='index_page')
 def index(request):
-    post_list = Post.objects.select_related()
+    post_list = Post.objects.select_related('group')
     pagin = paginator_func(post_list, request)
     context = {
         'page_obj': pagin,
@@ -21,7 +21,7 @@ def index(request):
 
 def group_posts(request, slug):
     group = get_object_or_404(Group, slug=slug)
-    post_list = Post.objects.all()
+    post_list = Post.objects.select_related('group')
     pagin = paginator_func(post_list, request)
     context = {
         'group': group,
@@ -41,18 +41,15 @@ def profile(request, username):
         'page_obj': pagin,
         'following': following,
     }
-    template = 'posts/profile.html'
-    return render(request, template, context)
+    return render(request, 'posts/profile.html', context)
 
 
 def post_detail(request, post_id):
     post = get_object_or_404(Post, pk=post_id)
-    post_detail = post.text[:FIRST_THIRTY]
     form = CommentForm()
     comments = post.comments.all()
     context = {
         'post': post,
-        'post_detail': post_detail,
         'form': form,
         'comments': comments,
     }
@@ -127,10 +124,8 @@ def profile_follow(request, username):
 
 @login_required
 def profile_unfollow(request, username):
-    user_follower = get_object_or_404(
-        Follow,
-        user=request.user,
-        author__username=username
-    )
-    user_follower.delete()
-    return redirect('posts:profile', username)
+    author = get_object_or_404(User, username=username)
+    follower = Follow.objects.filter(user=request.user, author=author)
+    if follower.exists():
+        follower.delete()
+    return redirect('posts:profile', username=author)
