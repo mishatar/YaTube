@@ -1,0 +1,15 @@
+GROUP_TITLE = 'Тестовая группа'
+GROUP_SLUG = 'test_slug'
+GROUP_DESCRIPTION = 'Тестовое описание'
+GROUP_TITLE_2 = 'Вторая тестовая группа'
+GROUP_SLUG_2 = 'test_slug_2'
+GROUP_DESCRIPTION_2 = 'Другое тестовое описание'
+POST_TEXT = 'Тестовый текст поста'
+POST_AUTHOR = 'post_author'
+SMALL_GIF = (
+    b'\x47\x49\x46\x38\x39\x61\x01\x00'
+    b'\x01\x00\x00\x00\x00\x21\xf9\x04'
+    b'\x01\x0a\x00\x01\x00\x2c\x00\x00'
+    b'\x00\x00\x01\x00\x01\x00\x00\x02'
+    b'\x02\x4c\x01\x00\x3b'
+)

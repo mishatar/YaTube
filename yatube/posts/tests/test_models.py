@@ -1,29 +1,56 @@
 from django.test import TestCase
 
+from . import const
 from ..models import Group, Post, User
-
-CONST = 15
 
 
 class PostModelTest(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.user = User.objects.create_user(username='auth')
-        cls.group = Group.objects.create(
-            title='Тестовая группа',
-            slug='Тестовый слаг',
-            description='Тестовое описание',
+        cls.test_group = Group.objects.create(
+            title=const.GROUP_TITLE,
+            slug=const.GROUP_SLUG,
+            description=const.GROUP_DESCRIPTION,
         )
+        cls.post_author = User.objects.create_user(username=const.POST_AUTHOR)
         cls.post = Post.objects.create(
-            author=cls.user,
-            text='Тестовый пост',
+            text=const.POST_TEXT,
+            author=cls.post_author,
         )
 
-        def test_models_have_correct_object_names(self):
-            expected_object_name = self.group.title[:CONST]
-            self.assertEqual(expected_object_name, str(self.group))
+    def test_models_have_correct_object_names(self):
+        """Проверяем, что у моделей корректно работает __str__."""
+        post = PostModelTest.post
+        group = PostModelTest.test_group
+        object_names = {
+            post: const.POST_TEXT[:15],
+            group: const.GROUP_TITLE,
+        }
+        for value, expected in object_names.items():
+            with self.subTest(value=value):
+                self.assertEqual(str(value), expected)
 
-        def test_models_len_post(self):
-            expected_object_name = self.post.text
-            self.assertEqual(expected_object_name, str(self.post))
+    def test_post_model_fields_verbose_names(self):
+        """Проверяем соответствие verbose_name в модели Post."""
+        post = PostModelTest.post
+        field_verboses = {
+            'author': 'Автор',
+            'group': 'Группа',
+        }
+        for value, expected in field_verboses.items():
+            with self.subTest(value=value):
+                self.assertEqual(
+                    post._meta.get_field(value).verbose_name, expected)
+
+    def test_post_models_fields_help_text(self):
+        """Проверяем соответствие help_text в моделях."""
+        post = PostModelTest.post
+        field_help_texts = {
+            'text': 'Введите текст поста',
+            'group': 'Выберите группу',
+        }
+        for value, expected in field_help_texts.items():
+            with self.subTest(value=value):
+                self.assertEqual(
+                    post._meta.get_field(value).help_text, expected)
