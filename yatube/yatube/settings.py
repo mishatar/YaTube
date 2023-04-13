@@ -13,9 +13,9 @@ SECRET_KEY = '3c65b$eg$fa=8dyta06$!*m_bxw*ohj0ypnegh1xt-msyo)egf'
 DEBUG = True
 
 ALLOWED_HOSTS = [
+    '158.160.60.186',
     'localhost',
     '127.0.0.1',
-    'testserver',
 ]
 
 INTERNAL_IPS = [
