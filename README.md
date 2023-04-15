@@ -18,7 +18,7 @@ Django 2.2.19
 
 ### Запуск проекта в dev-режиме 
 - Установите и активируйте виртуальное окружение
-    ``` python -m venv env ```
+    ``` python -m venv venv ```
 - Установите зависимости из файла requirements.txt 
 - ``` pip install -r requirements.txt ``` 
 - Выполнить миграции:
